@@ -191,28 +191,45 @@ export default {
     })
     
     // 加载成绩列表
-    const loadScoreList = () => {
-      // 模拟分页查询
-      const startIndex = (currentPage.value - 1) * pageSize.value
-      const endIndex = startIndex + pageSize.value
-      
-      // 模拟数据过滤
-      let filteredList = [...mockScoreList]
-      if (queryForm.studentId) {
-        filteredList = filteredList.filter(item => item.studentId.includes(queryForm.studentId))
+    const loadScoreList = async () => {
+      try {
+        // 调用后端API获取成绩列表，支持分页和筛选
+        const response = await axios.get('/scores', {
+          params: {
+            studentId: queryForm.studentId,
+            courseId: queryForm.courseId,
+            courseName: queryForm.courseName,
+            status: queryForm.status,
+            page: currentPage.value,
+            pageSize: pageSize.value
+          }
+        })
+        
+        total.value = response.data.total || 0
+        scoreList.value = response.data.list || []
+      } catch (error) {
+        ElMessage.error('获取成绩列表失败：' + error.message)
+        // 出错时使用模拟数据
+        const startIndex = (currentPage.value - 1) * pageSize.value
+        const endIndex = startIndex + pageSize.value
+        
+        let filteredList = [...mockScoreList]
+        if (queryForm.studentId) {
+          filteredList = filteredList.filter(item => item.studentId.includes(queryForm.studentId))
+        }
+        if (queryForm.courseId) {
+          filteredList = filteredList.filter(item => item.courseId.includes(queryForm.courseId))
+        }
+        if (queryForm.courseName) {
+          filteredList = filteredList.filter(item => item.courseName.includes(queryForm.courseName))
+        }
+        if (queryForm.status) {
+          filteredList = filteredList.filter(item => item.status === queryForm.status)
+        }
+        
+        total.value = filteredList.length
+        scoreList.value = filteredList.slice(startIndex, endIndex)
       }
-      if (queryForm.courseId) {
-        filteredList = filteredList.filter(item => item.courseId.includes(queryForm.courseId))
-      }
-      if (queryForm.courseName) {
-        filteredList = filteredList.filter(item => item.courseName.includes(queryForm.courseName))
-      }
-      if (queryForm.status) {
-        filteredList = filteredList.filter(item => item.status === queryForm.status)
-      }
-      
-      total.value = filteredList.length
-      scoreList.value = filteredList.slice(startIndex, endIndex)
     }
     
     // 处理查询

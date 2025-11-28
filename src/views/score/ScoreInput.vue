@@ -75,26 +75,32 @@ export default {
   name: 'ScoreInput',
   setup() {
     const selectedCourseId = ref('')
-    const courseList = ref([
-      { courseId: 'CS202501', courseName: '软件工程导论', credit: 3, courseType: '必修课' },
-      { courseId: 'CS202502', courseName: '数据结构', credit: 4, courseType: '必修课' },
-      { courseId: 'CS202503', courseName: '人工智能', credit: 3, courseType: '选修课' },
-      { courseId: 'CS202504', courseName: '机器学习', credit: 3, courseType: '选修课' }
-    ])
-    
+    const courseList = ref([])
     const scoreList = ref([])
+    
+    // 加载课程列表
+    const loadCourseList = async () => {
+      try {
+        // 这里应该调用获取课程列表的API，暂时使用模拟数据
+        // const response = await getCoursesByTeacherId('T001') // 实际应该从登录信息中获取
+        courseList.value = [
+          { courseId: 'CS202501', courseName: '软件工程导论', credit: 3, courseType: '必修课' },
+          { courseId: 'CS202502', courseName: '数据结构', credit: 4, courseType: '必修课' },
+          { courseId: 'CS202503', courseName: '人工智能', credit: 3, courseType: '选修课' },
+          { courseId: 'CS202504', courseName: '机器学习', credit: 3, courseType: '选修课' }
+        ]
+      } catch (error) {
+        ElMessage.error('获取课程列表失败：' + error.message)
+      }
+    }
     
     // 处理课程选择变化
     const handleCourseChange = async () => {
       if (selectedCourseId.value) {
         try {
+          // 调用后端API获取成绩列表
           const response = await getScoresByCourseId(selectedCourseId.value)
-          // 模拟数据，实际项目中应使用真实接口返回数据
-          scoreList.value = [
-            { studentId: '2024001', studentName: '张三', score: 85.5, grade: '良好', status: '已提交', scoreId: 1 },
-            { studentId: '2024002', studentName: '李四', score: 78.0, grade: '中等', status: '已提交', scoreId: 2 },
-            { studentId: '2024003', studentName: '王五', score: 92.0, grade: '优秀', status: '已提交', scoreId: 3 }
-          ]
+          scoreList.value = response.data || []
         } catch (error) {
           ElMessage.error('获取成绩列表失败：' + error.message)
         }
@@ -165,6 +171,11 @@ export default {
         ElMessage.error('成绩锁定失败：' + error.message)
       }
     }
+    
+    // 页面加载时初始化数据
+    onMounted(() => {
+      loadCourseList()
+    })
     
     return {
       selectedCourseId,
