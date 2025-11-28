@@ -61,7 +61,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 
 export default {
-  name: 'Dashboard',
+  name: 'DashboardView',
   setup() {
     const router = useRouter()
     const route = useRoute()

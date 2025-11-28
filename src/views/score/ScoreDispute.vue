@@ -219,7 +219,7 @@ export default {
         }
         
         // 调用后端API提交申诉
-        const response = await submitDispute(disputeData)
+        await submitDispute(disputeData)
         
         ElMessage.success('申诉提交成功，等待审核')
         

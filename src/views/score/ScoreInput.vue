@@ -67,7 +67,7 @@
 </template>
 
 <script>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { getScoresByCourseId, updateScore, submitScores, lockScores } from '../../api/score'
 

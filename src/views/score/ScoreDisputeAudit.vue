@@ -116,10 +116,10 @@
           <el-input v-model="auditForm.disputeId" readonly />
         </el-form-item>
         <el-form-item label="学生信息">
-          <el-input v-model="`${auditForm.studentId} - ${auditForm.studentName}`" readonly />
+          <el-input :value="`${auditForm.studentId} - ${auditForm.studentName}`" readonly />
         </el-form-item>
         <el-form-item label="课程信息">
-          <el-input v-model="`${auditForm.courseName} (${auditForm.courseId})`" readonly />
+          <el-input :value="`${auditForm.courseName} (${auditForm.courseId})`" readonly />
         </el-form-item>
         <el-form-item label="原始成绩">
           <el-input v-model="auditForm.score" readonly />
@@ -432,7 +432,7 @@ export default {
         }
         
         // 调用后端API审核申诉
-        const response = await auditDispute(auditForm.disputeId, auditData)
+        await auditDispute(auditForm.disputeId, auditData)
         
         ElMessage.success('审核成功')
         auditDialogVisible.value = false
