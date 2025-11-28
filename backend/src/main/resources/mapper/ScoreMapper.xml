@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cms.dao.ScoreDao">
+    
+    <!-- 插入成绩记录 -->
+    <insert id="insertScore" parameterType="com.cms.entity.Score">
+        INSERT INTO score (student_id, course_id, score, grade, input_teacher_id, input_time, update_time, status)
+        VALUES (#{studentId}, #{courseId}, #{score}, #{grade}, #{inputTeacherId}, #{inputTime}, #{updateTime}, #{status})
+    </insert>
+    
+    <!-- 更新成绩记录 -->
+    <update id="updateScore" parameterType="com.cms.entity.Score">
+        UPDATE score
+        SET score = #{score},
+            grade = #{grade},
+            input_teacher_id = #{inputTeacherId},
+            update_time = #{updateTime},
+            status = #{status}
+        WHERE score_id = #{scoreId}
+    </update>
+    
+    <!-- 根据成绩ID删除成绩记录 -->
+    <delete id="deleteScoreById" parameterType="java.lang.Integer">
+        DELETE FROM score
+        WHERE score_id = #{scoreId}
+    </delete>
+    
+    <!-- 根据成绩ID查询成绩记录 -->
+    <select id="selectScoreById" parameterType="java.lang.Integer" resultType="com.cms.entity.Score">
+        SELECT * FROM score
+        WHERE score_id = #{scoreId}
+    </select>
+    
+    <!-- 根据学号和课程号查询成绩记录 -->
+    <select id="selectScoreByStudentAndCourse" resultType="com.cms.entity.Score">
+        SELECT * FROM score
+        WHERE student_id = #{studentId} AND course_id = #{courseId}
+    </select>
+    
+    <!-- 根据课程号查询成绩列表 -->
+    <select id="selectScoresByCourseId" parameterType="java.lang.String" resultType="com.cms.entity.Score">
+        SELECT * FROM score
+        WHERE course_id = #{courseId}
+        ORDER BY student_id
+    </select>
+    
+    <!-- 根据学号查询成绩列表 -->
+    <select id="selectScoresByStudentId" parameterType="java.lang.String" resultType="com.cms.entity.Score">
+        SELECT * FROM score
+        WHERE student_id = #{studentId}
+        ORDER BY course_id
+    </select>
+    
+    <!-- 根据教师ID查询所授课程的成绩列表 -->
+    <select id="selectScoresByTeacherId" parameterType="java.lang.String" resultType="com.cms.entity.Score">
+        SELECT s.* FROM score s
+        JOIN course c ON s.course_id = c.course_id
+        WHERE c.teacher_id = #{teacherId}
+        ORDER BY s.course_id, s.student_id
+    </select>
+    
+    <!-- 更新成绩状态 -->
+    <update id="updateScoreStatus">
+        UPDATE score
+        SET status = #{status}
+        WHERE course_id = #{courseId}
+    </update>
+    
+    <!-- 批量插入成绩记录 -->
+    <insert id="batchInsertScores" parameterType="java.util.List">
+        INSERT INTO score (student_id, course_id, score, grade, input_teacher_id, input_time, update_time, status)
+        VALUES
+        <foreach collection="scores" item="score" separator=",">
+            (#{score.studentId}, #{score.courseId}, #{score.score}, #{score.grade}, #{score.inputTeacherId}, #{score.inputTime}, #{score.updateTime}, #{score.status})
+        </foreach>
+    </insert>
+    
+    <!-- 批量更新成绩记录 -->
+    <update id="batchUpdateScores" parameterType="java.util.List">
+        <foreach collection="scores" item="score" separator=";">
+            UPDATE score
+            SET score = #{score.score},
+                grade = #{score.grade},
+                input_teacher_id = #{score.inputTeacherId},
+                update_time = #{score.updateTime},
+                status = #{score.status}
+            WHERE score_id = #{score.scoreId}
+        </foreach>
+    </update>
+</mapper>
