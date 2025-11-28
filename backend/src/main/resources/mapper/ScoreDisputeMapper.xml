@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cms.dao.ScoreDisputeDao">
+    
+    <!-- 插入成绩异议记录 -->
+    <insert id="insertScoreDispute" parameterType="com.cms.entity.ScoreDispute">
+        INSERT INTO score_dispute (student_id, course_id, reason, attachment, apply_time, audit_status)
+        VALUES (#{studentId}, #{courseId}, #{reason}, #{attachment}, #{applyTime}, #{auditStatus})
+    </insert>
+    
+    <!-- 更新成绩异议记录 -->
+    <update id="updateScoreDispute" parameterType="com.cms.entity.ScoreDispute">
+        UPDATE score_dispute
+        SET audit_status = #{auditStatus},
+            audit_opinion = #{auditOpinion},
+            audit_user_id = #{auditUserId},
+            audit_time = #{auditTime}
+        WHERE dispute_id = #{disputeId}
+    </update>
+    
+    <!-- 根据异议ID删除成绩异议记录 -->
+    <delete id="deleteScoreDisputeById" parameterType="java.lang.Integer">
+        DELETE FROM score_dispute
+        WHERE dispute_id = #{disputeId}
+    </delete>
+    
+    <!-- 根据异议ID查询成绩异议记录 -->
+    <select id="selectScoreDisputeById" parameterType="java.lang.Integer" resultType="com.cms.entity.ScoreDispute">
+        SELECT * FROM score_dispute
+        WHERE dispute_id = #{disputeId}
+    </select>
+    
+    <!-- 根据学号查询成绩异议列表 -->
+    <select id="selectScoreDisputesByStudentId" parameterType="java.lang.String" resultType="com.cms.entity.ScoreDispute">
+        SELECT * FROM score_dispute
+        WHERE student_id = #{studentId}
+        ORDER BY apply_time DESC
+    </select>
+    
+    <!-- 根据课程号查询成绩异议列表 -->
+    <select id="selectScoreDisputesByCourseId" parameterType="java.lang.String" resultType="com.cms.entity.ScoreDispute">
+        SELECT * FROM score_dispute
+        WHERE course_id = #{courseId}
+        ORDER BY apply_time DESC
+    </select>
+    
+    <!-- 根据教师ID查询成绩异议列表 -->
+    <select id="selectScoreDisputesByTeacherId" parameterType="java.lang.String" resultType="com.cms.entity.ScoreDispute">
+        SELECT sd.* FROM score_dispute sd
+        JOIN course c ON sd.course_id = c.course_id
+        WHERE c.teacher_id = #{teacherId}
+        ORDER BY sd.apply_time DESC
+    </select>
+    
+    <!-- 查询所有成绩异议列表 -->
+    <select id="selectAllScoreDisputes" resultType="com.cms.entity.ScoreDispute">
+        SELECT * FROM score_dispute
+        ORDER BY apply_time DESC
+    </select>
+    
+    <!-- 根据审核状态查询成绩异议列表 -->
+    <select id="selectScoreDisputesByAuditStatus" parameterType="java.lang.String" resultType="com.cms.entity.ScoreDispute">
+        SELECT * FROM score_dispute
+        WHERE audit_status = #{auditStatus}
+        ORDER BY apply_time DESC
+    </select>
+</mapper>
