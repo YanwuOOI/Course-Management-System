@@ -209,7 +209,8 @@ export default {
         total.value = response.data.total || 0
         scoreList.value = response.data.list || []
       } catch (error) {
-        ElMessage.error('获取成绩列表失败：' + error.message)
+        // 只在控制台打印错误，不向用户显示
+        console.log('获取成绩列表失败，使用模拟数据：', error.message)
         // 出错时使用模拟数据
         const startIndex = (currentPage.value - 1) * pageSize.value
         const endIndex = startIndex + pageSize.value

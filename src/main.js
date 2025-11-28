@@ -14,7 +14,7 @@ app.use(ElementPlus)
 app.use(router)
 
 // 配置Axios
-axios.defaults.baseURL = '/api'
+axios.defaults.baseURL = 'http://localhost:8081/api'
 axios.defaults.timeout = 10000
 
 // 添加请求拦截器
