@@ -54,6 +54,26 @@
         SELECT * FROM course WHERE course_name LIKE CONCAT('%', #{courseName}, '%')
     </select>
     
+    <!-- 多条件查询课程列表 -->
+    <select id="selectCoursesByMultipleConditions" resultType="com.cms.entity.Course">
+        SELECT c.* FROM course c
+        JOIN user u ON c.teacher_id = u.user_id
+        WHERE 1=1
+        <if test="keyword != null and keyword != ''">
+            AND (c.course_name LIKE CONCAT('%', #{keyword}, '%') OR u.name LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        <if test="courseType != null and courseType != ''">
+            AND c.course_type = #{courseType}
+        </if>
+        <if test="dept != null and dept != ''">
+            AND u.dept = #{dept}
+        </if>
+        <if test="teacherId != null and teacherId != ''">
+            AND c.teacher_id = #{teacherId}
+        </if>
+        ORDER BY c.${sortBy} ${order}
+    </select>
+    
     <!-- 更新课程已选人数 -->
     <update id="updateCourseSelectedNum">
         UPDATE course

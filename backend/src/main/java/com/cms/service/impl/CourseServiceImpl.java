@@ -106,6 +106,11 @@ public class CourseServiceImpl implements CourseService {
     }
     
     @Override
+    public List<Course> searchCourses(String keyword, String courseType, String dept, String teacherId, String sortBy, String order) {
+        return courseDao.selectCoursesByMultipleConditions(keyword, courseType, dept, teacherId, sortBy, order);
+    }
+    
+    @Override
     public boolean isCourseFull(String courseId) {
         Course course = courseDao.selectCourseById(courseId);
         if (course == null) {
