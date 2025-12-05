@@ -4,6 +4,11 @@
       <template #header>
         <div class="card-header">
           <h2>成绩录入</h2>
+          <div class="header-actions">
+            <!-- 添加批量导入按钮 -->
+            <el-button type="success" @click="showImportDialog = true">批量导入</el-button>
+            <el-button type="primary" @click="handleExportTemplate">导出模板</el-button>
+          </div>
         </div>
       </template>
       
@@ -62,6 +67,41 @@
         <el-button type="primary" @click="handleSubmitScores" :disabled="!selectedCourseId">提交成绩</el-button>
         <el-button type="warning" @click="handleLockScores" :disabled="!selectedCourseId">锁定成绩</el-button>
       </div>
+      
+      <!-- 批量导入对话框 -->
+      <el-dialog
+        v-model="showImportDialog"
+        title="批量导入成绩"
+        width="600px"
+        @close="resetImportForm"
+      >
+        <el-upload
+          class="upload-demo"
+          drag
+          action="#"
+          :auto-upload="false"
+          :file-list="importFileList"
+          :on-change="handleFileChange"
+          :on-remove="handleFileRemove"
+          accept=".xlsx,.xls"
+        >
+          <el-icon class="el-icon--upload"><upload-filled /></el-icon>
+          <div class="el-upload__text">
+            将文件拖到此处，或<em>点击上传</em>
+          </div>
+          <template #tip>
+            <div class="el-upload__tip">
+              支持上传Excel格式文件（.xlsx/.xls），请使用标准模板填写数据
+            </div>
+          </template>
+        </el-upload>
+        <template #footer>
+          <span class="dialog-footer">
+            <el-button @click="showImportDialog = false">取消</el-button>
+            <el-button type="primary" @click="handleBatchImport" :disabled="importFileList.length === 0">开始导入</el-button>
+          </span>
+        </template>
+      </el-dialog>
     </el-card>
   </div>
 </template>
@@ -69,14 +109,22 @@
 <script>
 import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { getScoresByCourseId, updateScore, submitScores, lockScores } from '../../api/score'
+import { UploadFilled } from '@element-plus/icons-vue'
+import * as XLSX from 'xlsx'
+import { getScoresByCourseId, updateScore, submitScores, lockScores, batchInputScores } from '../../api/score'
 
 export default {
   name: 'ScoreInput',
+  components: {
+    UploadFilled
+  },
   setup() {
     const selectedCourseId = ref('')
     const courseList = ref([])
     const scoreList = ref([])
+    // 批量导入相关
+    const showImportDialog = ref(false)
+    const importFileList = ref([])
     
     // 加载课程列表
     const loadCourseList = async () => {
@@ -172,6 +220,120 @@ export default {
       }
     }
     
+    // 批量导入相关
+    const resetImportForm = () => {
+      importFileList.value = []
+    }
+    
+    const handleFileChange = (file, fileList) => {
+      importFileList.value = fileList
+    }
+    
+    const handleFileRemove = (file, fileList) => {
+      importFileList.value = fileList
+    }
+    
+    // 批量导入
+    const handleBatchImport = async () => {
+      try {
+        if (!importFileList.value || importFileList.value.length === 0) {
+          ElMessage.warning('请先选择要导入的文件')
+          return
+        }
+        
+        if (!selectedCourseId.value) {
+          ElMessage.warning('请先选择课程')
+          return
+        }
+        
+        showImportDialog.value = false
+        ElMessage({
+          message: '正在导入，请稍候...',
+          duration: 0,
+          type: 'info'
+        })
+        
+        // 读取上传的Excel文件
+        const file = importFileList.value[0].raw
+        const reader = new FileReader()
+        
+        reader.onload = async (e) => {
+          try {
+            // 解析Excel文件
+            const data = new Uint8Array(e.target.result)
+            const workbook = XLSX.read(data, { type: 'array' })
+            const worksheet = workbook.Sheets[workbook.SheetNames[0]]
+            const jsonData = XLSX.utils.sheet_to_json(worksheet)
+            
+            // 转换数据格式
+            const scoreDataList = jsonData.map(item => {
+              // 根据Excel模板的字段名调整
+              const score = parseFloat(item.成绩 || item.score || 0)
+              let grade = ''
+              
+              // 自动计算成绩等级
+              if (score >= 90) {
+                grade = '优秀'
+              } else if (score >= 80) {
+                grade = '良好'
+              } else if (score >= 70) {
+                grade = '中等'
+              } else if (score >= 60) {
+                grade = '及格'
+              } else {
+                grade = '不及格'
+              }
+              
+              return {
+                studentId: item.学号 || item.studentId || '',
+                courseId: selectedCourseId.value,
+                score: score,
+                grade: grade,
+                inputTeacherId: 'T001', // 实际应从登录信息中获取
+                status: '未提交'
+              }
+            }).filter(item => item.studentId && item.score >= 0 && item.score <= 100)
+            
+            // 调用后端API进行批量导入
+            const response = await batchInputScores(scoreDataList)
+            
+            ElMessage.closeAll()
+            const successCount = response || 0
+            const failCount = scoreDataList.length - successCount
+            
+            if (failCount === 0) {
+              ElMessage.success(`批量导入成功，共导入 ${successCount} 条记录`)
+              // 重新加载成绩列表
+              if (selectedCourseId.value) {
+                handleCourseChange()
+              }
+            } else {
+              ElMessage.warning(`批量导入完成，成功 ${successCount} 条，失败 ${failCount} 条`)
+            }
+          } catch (error) {
+            ElMessage.closeAll()
+            ElMessage.error('文件解析失败：' + error.message)
+          }
+        }
+        
+        reader.onerror = (error) => {
+          ElMessage.closeAll()
+          ElMessage.error('文件读取失败：' + error.message)
+        }
+        
+        reader.readAsArrayBuffer(file)
+      } catch (error) {
+        ElMessage.closeAll()
+        ElMessage.error('批量导入失败：' + error.message)
+      }
+    }
+    
+    // 导出模板
+    const handleExportTemplate = () => {
+      // 实际项目中应该调用后端API获取模板文件
+      ElMessage.success('模板导出功能开发中')
+    }
+    
     // 页面加载时初始化数据
     onMounted(() => {
       loadCourseList()
@@ -181,12 +343,20 @@ export default {
       selectedCourseId,
       courseList,
       scoreList,
+      // 批量导入相关
+      showImportDialog,
+      importFileList,
       handleCourseChange,
       handleScoreChange,
       handleCellEditComplete,
       handleSaveScore,
       handleSubmitScores,
-      handleLockScores
+      handleLockScores,
+      handleFileChange,
+      handleFileRemove,
+      handleBatchImport,
+      handleExportTemplate,
+      resetImportForm
     }
   }
 }
@@ -205,6 +375,11 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.header-actions {
+  display: flex;
+  gap: 10px;
 }
 
 .course-select-item {

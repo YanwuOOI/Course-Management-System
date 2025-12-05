@@ -211,15 +211,19 @@ export default {
       try {
         await disputeFormRef.value.validate()
         
-        // 构造申诉数据
-        const disputeData = {
-          ...disputeForm,
-          studentId: '2024001', // 实际应该从登录信息中获取
-          attachment: fileList.value.length > 0 ? fileList.value[0].name : null
+        // 构造FormData，用于处理文件上传
+        const formData = new FormData()
+        formData.append('studentId', '2024001') // 实际应该从登录信息中获取
+        formData.append('courseId', disputeForm.courseId)
+        formData.append('reason', disputeForm.reason)
+        
+        // 添加文件到FormData
+        if (fileList.value.length > 0 && fileList.value[0].raw) {
+          formData.append('file', fileList.value[0].raw)
         }
         
         // 调用后端API提交申诉
-        await submitDispute(disputeData)
+        await submitDispute(formData)
         
         ElMessage.success('申诉提交成功，等待审核')
         

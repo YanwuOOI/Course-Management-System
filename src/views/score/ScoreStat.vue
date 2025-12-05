@@ -43,7 +43,7 @@
           <el-card shadow="hover" class="stat-card">
             <div class="stat-item">
               <div class="stat-label">平均分</div>
-              <div class="stat-value">{{ statData.averageScore }}</div>
+              <div class="stat-value">{{ statData.averageScore.toFixed(1) }}</div>
             </div>
           </el-card>
         </el-col>
@@ -70,7 +70,7 @@
           <el-card shadow="hover" class="stat-card">
             <div class="stat-item">
               <div class="stat-label">及格率</div>
-              <div class="stat-value">{{ statData.passRate }}%</div>
+              <div class="stat-value">{{ statData.passRate.toFixed(1) }}%</div>
             </div>
           </el-card>
         </el-col>
@@ -117,9 +117,41 @@
             </div>
           </el-card>
         </el-col>
+        <el-col :span="6">
+          <el-card shadow="hover" class="stat-card">
+            <div class="stat-item">
+              <div class="stat-label">总人数</div>
+              <div class="stat-value">{{ totalCount }}</div>
+            </div>
+          </el-card>
+        </el-col>
       </el-row>
       
       <!-- 成绩分布图表 -->
+      <el-row :gutter="20" class="chart-row" v-if="statData">
+        <el-col :span="12">
+          <el-card class="chart-card">
+            <template #header>
+              <div class="chart-header">
+                <h3>成绩分布柱状图</h3>
+              </div>
+            </template>
+            <div ref="barChartRef" class="chart-container"></div>
+          </el-card>
+        </el-col>
+        <el-col :span="12">
+          <el-card class="chart-card">
+            <template #header>
+              <div class="chart-header">
+                <h3>成绩分布饼图</h3>
+              </div>
+            </template>
+            <div ref="pieChartRef" class="chart-container"></div>
+          </el-card>
+        </el-col>
+      </el-row>
+      
+      <!-- 成绩分布图 -->
       <el-card class="chart-card" v-if="statData">
         <template #header>
           <div class="chart-header">
@@ -157,8 +189,9 @@
 </template>
 
 <script>
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, onMounted, watch, onBeforeUnmount } from 'vue'
 import { ElMessage } from 'element-plus'
+import * as echarts from 'echarts'
 import { statCourseScores } from '../../api/score'
 
 export default {
@@ -170,6 +203,12 @@ export default {
     })
     
     const statData = ref(null)
+    
+    // 图表相关
+    const barChartRef = ref(null)
+    const pieChartRef = ref(null)
+    let barChartInstance = null
+    let pieChartInstance = null
     
     // 模拟统计数据
     const mockStatData = {
@@ -219,6 +258,176 @@ export default {
       return Math.round((statData.value.failCount / totalCount.value) * 100)
     })
     
+    // 初始化柱状图
+    const initBarChart = () => {
+      if (barChartRef.value) {
+        barChartInstance = echarts.init(barChartRef.value)
+        
+        // 监听窗口大小变化，调整图表大小
+        window.addEventListener('resize', handleResize)
+        
+        updateBarChart()
+      }
+    }
+    
+    // 初始化饼图
+    const initPieChart = () => {
+      if (pieChartRef.value) {
+        pieChartInstance = echarts.init(pieChartRef.value)
+        
+        // 监听窗口大小变化，调整图表大小
+        window.addEventListener('resize', handleResize)
+        
+        updatePieChart()
+      }
+    }
+    
+    // 更新柱状图数据
+    const updateBarChart = () => {
+      if (!barChartInstance || !statData.value) return
+      
+      const option = {
+        title: {
+          text: '成绩分布',
+          left: 'center'
+        },
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: {
+            type: 'shadow'
+          }
+        },
+        grid: {
+          left: '3%',
+          right: '4%',
+          bottom: '3%',
+          containLabel: true
+        },
+        xAxis: {
+          type: 'category',
+          data: ['优秀', '良好', '中等', '及格', '不及格'],
+          axisLabel: {
+            interval: 0
+          }
+        },
+        yAxis: {
+          type: 'value',
+          name: '人数'
+        },
+        series: [
+          {
+            name: '人数',
+            type: 'bar',
+            data: [
+              statData.value.excellentCount,
+              statData.value.goodCount,
+              statData.value.mediumCount,
+              statData.value.passCount,
+              statData.value.failCount
+            ],
+            itemStyle: {
+              color: function(params) {
+                const colors = ['#409EFF', '#67C23A', '#E6A23C', '#909399', '#F56C6C']
+                return colors[params.dataIndex]
+              }
+            }
+          }
+        ]
+      }
+      
+      barChartInstance.setOption(option)
+    }
+    
+    // 更新饼图数据
+    const updatePieChart = () => {
+      if (!pieChartInstance || !statData.value) return
+      
+      const option = {
+        title: {
+          text: '成绩分布比例',
+          left: 'center'
+        },
+        tooltip: {
+          trigger: 'item',
+          formatter: '{a} <br/>{b}: {c} ({d}%)'
+        },
+        legend: {
+          orient: 'vertical',
+          left: 'left'
+        },
+        series: [
+          {
+            name: '成绩分布',
+            type: 'pie',
+            radius: '50%',
+            center: ['50%', '60%'],
+            data: [
+              {
+                value: statData.value.excellentCount,
+                name: '优秀'
+              },
+              {
+                value: statData.value.goodCount,
+                name: '良好'
+              },
+              {
+                value: statData.value.mediumCount,
+                name: '中等'
+              },
+              {
+                value: statData.value.passCount,
+                name: '及格'
+              },
+              {
+                value: statData.value.failCount,
+                name: '不及格'
+              }
+            ],
+            emphasis: {
+              itemStyle: {
+                shadowBlur: 10,
+                shadowOffsetX: 0,
+                shadowColor: 'rgba(0, 0, 0, 0.5)'
+              }
+            },
+            itemStyle: {
+              color: function(params) {
+                const colors = ['#409EFF', '#67C23A', '#E6A23C', '#909399', '#F56C6C']
+                return colors[params.dataIndex]
+              }
+            }
+          }
+        ]
+      }
+      
+      pieChartInstance.setOption(option)
+    }
+    
+    // 窗口大小变化时调整图表大小
+    const handleResize = () => {
+      if (barChartInstance) {
+        barChartInstance.resize()
+      }
+      if (pieChartInstance) {
+        pieChartInstance.resize()
+      }
+    }
+    
+    // 销毁图表
+    const destroyCharts = () => {
+      if (barChartInstance) {
+        barChartInstance.dispose()
+        barChartInstance = null
+      }
+      if (pieChartInstance) {
+        pieChartInstance.dispose()
+        pieChartInstance = null
+      }
+      
+      // 移除窗口大小变化监听
+      window.removeEventListener('resize', handleResize)
+    }
+    
     // 处理查询
     const handleQuery = async () => {
       try {
@@ -241,14 +450,41 @@ export default {
       statData.value = null
     }
     
+    // 监听统计数据变化，更新图表
+    watch(statData, () => {
+      if (statData.value) {
+        if (!barChartInstance || !pieChartInstance) {
+          initBarChart()
+          initPieChart()
+        } else {
+          updateBarChart()
+          updatePieChart()
+        }
+      }
+    })
+    
+    // 组件挂载时初始化图表
+    onMounted(() => {
+      initBarChart()
+      initPieChart()
+    })
+    
+    // 组件卸载前销毁图表
+    onBeforeUnmount(() => {
+      destroyCharts()
+    })
+    
     return {
       queryForm,
       statData,
+      totalCount,
       excellentPercentage,
       goodPercentage,
       mediumPercentage,
       passPercentage,
       failPercentage,
+      barChartRef,
+      pieChartRef,
       handleQuery,
       handleReset
     }
@@ -299,14 +535,24 @@ export default {
   color: #303133;
 }
 
+.chart-row {
+  margin-bottom: 20px;
+}
+
 .chart-card {
   margin-top: 20px;
+  height: 100%;
 }
 
 .chart-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.chart-container {
+  width: 100%;
+  height: 400px;
 }
 
 .chart-content {

@@ -67,6 +67,15 @@ export const archiveScores = (semester) => {
 
 // 提交成绩异议
 export const submitDispute = (disputeData) => {
+  // 如果是FormData类型，需要设置Content-Type为multipart/form-data
+  if (disputeData instanceof FormData) {
+    return axios.post('/score-disputes', disputeData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+  }
+  // 否则使用默认的application/json
   return axios.post('/score-disputes', disputeData)
 }
 
