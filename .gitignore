@@ -1,15 +1,3 @@
-<<<<<<< HEAD
-.DS_Store
-node_modules
-/dist
-
-
-# local env files
-.env.local
-.env.*.local
-
-# Log files
-=======
 # Dependencies
 node_modules/
 backend/target/
@@ -20,6 +8,11 @@ backend/target/
 *.swp
 *.swo
 *~
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
 
 # OS
 .DS_Store
@@ -28,22 +21,10 @@ Thumbs.db
 # Logs
 logs/
 *.log
->>>>>>> f2baa536569d3ed80f6c43a6734928e83b86888e
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
-<<<<<<< HEAD
-
-# Editor directories and files
-.idea
-.vscode
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-=======
 lerna-debug.log*
 
 # Build
@@ -53,6 +34,7 @@ frontend/build/
 # Environment variables
 .env
 .env.local
+.env.*.local
 .env.development.local
 .env.test.local
 .env.production.local
@@ -66,4 +48,6 @@ coverage/
 *.tmp
 *.temp
 .cache/
->>>>>>> f2baa536569d3ed80f6c43a6734928e83b86888e
+
+# AI/Tools
+.trae/
