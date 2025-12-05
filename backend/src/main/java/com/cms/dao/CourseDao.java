@@ -70,6 +70,24 @@ public interface CourseDao {
     List<Course> selectCoursesByName(@Param("courseName") String courseName);
     
     /**
+     * 多条件查询课程列表
+     * @param keyword 关键词（课程名、教师名）
+     * @param courseType 课程类型
+     * @param dept 院系
+     * @param teacherId 教师ID
+     * @param sortBy 排序字段
+     * @param order 排序方式（asc/desc）
+     * @return 课程列表
+     */
+    List<Course> selectCoursesByMultipleConditions(
+            @Param("keyword") String keyword,
+            @Param("courseType") String courseType,
+            @Param("dept") String dept,
+            @Param("teacherId") String teacherId,
+            @Param("sortBy") String sortBy,
+            @Param("order") String order);
+    
+    /**
      * 更新课程已选人数
      * @param courseId 课程号
      * @param changeNum 变化数量（正数增加，负数减少）

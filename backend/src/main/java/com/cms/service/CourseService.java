@@ -68,6 +68,18 @@ public interface CourseService {
     List<Course> getCoursesByName(String courseName);
     
     /**
+     * 多条件查询课程
+     * @param keyword 关键词（课程名、教师名）
+     * @param courseType 课程类型
+     * @param dept 院系
+     * @param teacherId 教师ID
+     * @param sortBy 排序字段
+     * @param order 排序方式（asc/desc）
+     * @return 课程列表
+     */
+    List<Course> searchCourses(String keyword, String courseType, String dept, String teacherId, String sortBy, String order);
+    
+    /**
      * 检查课程是否已满
      * @param courseId 课程号
      * @return 是否已满

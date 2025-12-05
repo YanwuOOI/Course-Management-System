@@ -147,4 +147,30 @@ public class CourseController {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+    
+    /**
+     * 多条件查询课程
+     * @param keyword 关键词（课程名、教师名）
+     * @param courseType 课程类型
+     * @param dept 院系
+     * @param teacherId 教师ID
+     * @param sortBy 排序字段
+     * @param order 排序方式（asc/desc）
+     * @return 课程列表
+     */
+    @GetMapping("/search")
+    public ResponseEntity<List<Course>> searchCourses(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String courseType,
+            @RequestParam(required = false) String dept,
+            @RequestParam(required = false) String teacherId,
+            @RequestParam(required = false, defaultValue = "courseId") String sortBy,
+            @RequestParam(required = false, defaultValue = "asc") String order) {
+        try {
+            List<Course> courses = courseService.searchCourses(keyword, courseType, dept, teacherId, sortBy, order);
+            return new ResponseEntity<>(courses, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }
