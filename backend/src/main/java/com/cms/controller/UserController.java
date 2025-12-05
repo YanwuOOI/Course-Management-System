@@ -15,6 +15,9 @@ import java.util.Map;
 /**
  * 用户控制器
  * 处理用户管理的RESTful API请求
+ * 作者：严翊航
+ * 模块：用户管理模块
+ * 功能：用户信息的增删改查、角色管理、状态管理等
  */
 @RestController
 @RequestMapping("/api/users")

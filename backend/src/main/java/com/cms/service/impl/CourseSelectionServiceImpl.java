@@ -16,7 +16,8 @@ import java.util.List;
  * 选课记录Service实现类
  * 实现选课管理的业务逻辑
  * @author 张嘉欢
- * @date 2025-11-30
+ * @since 2025-11-30
+ * @module 选课系统模块
  */
 @Service
 public class CourseSelectionServiceImpl implements CourseSelectionService {

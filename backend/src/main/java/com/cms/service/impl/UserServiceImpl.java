@@ -16,6 +16,9 @@ import java.util.List;
 /**
  * 用户Service实现类
  * 实现用户管理的业务逻辑
+ * @author 严翊航
+ * @since 2025-11-30
+ * @module 用户管理模块
  */
 @Service
 public class UserServiceImpl implements UserService {

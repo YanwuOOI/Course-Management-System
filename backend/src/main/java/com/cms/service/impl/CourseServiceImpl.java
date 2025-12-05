@@ -15,8 +15,9 @@ import java.util.List;
 /**
  * 课程Service实现类
  * 实现课程管理的业务逻辑
- * @author 张嘉欢
- * @date 2025-11-30
+ * @author 庞佳泽
+ * @since 2025-11-30
+ * @module 课程管理模块
  */
 @Service
 public class CourseServiceImpl implements CourseService {

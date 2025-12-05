@@ -17,7 +17,8 @@ import java.util.List;
  * 成绩Service实现类
  * 实现成绩管理的业务逻辑
  * @author 许祖嘉
- * @date 2025-11-28
+ * @since 2025-11-30
+ * @module 成绩管理模块
  */
 @Service
 public class ScoreServiceImpl implements ScoreService {

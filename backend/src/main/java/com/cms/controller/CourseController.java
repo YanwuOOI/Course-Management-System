@@ -13,8 +13,9 @@ import java.util.List;
 /**
  * 课程Controller
  * 处理课程管理的HTTP请求
- * @author 张嘉欢
- * @date 2025-11-30
+ * @author 庞佳泽
+ * @since 2025-11-30
+ * @module 课程管理模块
  */
 @RestController
 @RequestMapping("/courses")

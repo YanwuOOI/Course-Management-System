@@ -15,7 +15,8 @@ import java.util.List;
  * 成绩Controller
  * 处理成绩管理的HTTP请求
  * @author 许祖嘉
- * @date 2025-11-28
+ * @since 2025-11-30
+ * @module 成绩管理模块
  */
 @RestController
 @RequestMapping("/scores")

@@ -13,7 +13,8 @@ import java.util.List;
  * 选课记录Controller
  * 处理选课管理的HTTP请求
  * @author 张嘉欢
- * @date 2025-11-30
+ * @since 2025-11-30
+ * @module 选课系统模块
  */
 @RestController
 @RequestMapping("/course-selections")

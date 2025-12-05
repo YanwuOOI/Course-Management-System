@@ -19,7 +19,8 @@ import java.util.List;
  * 成绩异议Service实现类
  * 实现成绩异议处理的业务逻辑
  * @author 许祖嘉
- * @date 2025-11-28
+ * @since 2025-11-30
+ * @module 成绩管理模块
  */
 @Service
 public class ScoreDisputeServiceImpl implements ScoreDisputeService {
