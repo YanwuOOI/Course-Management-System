@@ -2,6 +2,7 @@ package com.cms.service;
 
 import com.cms.entity.Course;
 import com.cms.dto.CourseDTO;
+import com.cms.dto.PageResult;
 
 import java.util.List;
 
@@ -68,7 +69,21 @@ public interface CourseService {
     List<Course> getCoursesByName(String courseName);
     
     /**
-     * 多条件查询课程
+     * 多条件查询课程（分页）
+     * @param keyword 关键词（课程名、教师名）
+     * @param courseType 课程类型
+     * @param dept 院系
+     * @param teacherId 教师ID
+     * @param sortBy 排序字段
+     * @param order 排序方式（asc/desc）
+     * @param page 页码
+     * @param pageSize 每页大小
+     * @return 分页结果
+     */
+    PageResult<Course> searchCourses(String keyword, String courseType, String dept, String teacherId, String sortBy, String order, int page, int pageSize);
+    
+    /**
+     * 多条件查询课程（不分页）
      * @param keyword 关键词（课程名、教师名）
      * @param courseType 课程类型
      * @param dept 院系

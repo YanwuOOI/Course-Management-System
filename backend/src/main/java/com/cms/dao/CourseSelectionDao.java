@@ -80,7 +80,21 @@ public interface CourseSelectionDao {
     List<CourseSelection> selectCourseSelectionsByTeacherId(@Param("teacherId") String teacherId);
     
     /**
-     * 查询所有选课记录列表
+     * 查询所有选课记录列表（分页）
+     * @param offset 偏移量
+     * @param limit 每页大小
+     * @return 选课记录列表
+     */
+    List<CourseSelection> selectCourseSelectionsByPage(@Param("offset") int offset, @Param("limit") int limit);
+    
+    /**
+     * 查询所有选课记录总数
+     * @return 选课记录总数
+     */
+    int countAllCourseSelections();
+    
+    /**
+     * 查询所有选课记录列表（不分页）
      * @return 选课记录列表
      */
     List<CourseSelection> selectAllCourseSelections();

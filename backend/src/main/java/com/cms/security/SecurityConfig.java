@@ -33,42 +33,56 @@ public class SecurityConfig {
             // 禁用CSRF保护，因为使用JWT认证
             .csrf(csrf -> csrf.disable())
             
+            // 显式配置CORS
+            .cors(cors -> cors.configurationSource(request -> {
+                org.springframework.web.cors.CorsConfiguration config = new org.springframework.web.cors.CorsConfiguration();
+                // 允许所有源，不使用allowCredentials
+                config.setAllowedOrigins(java.util.Collections.singletonList("*") );
+                config.setAllowedMethods(java.util.Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                config.setAllowedHeaders(java.util.Arrays.asList("*"));
+                config.setAllowCredentials(false);
+                return config;
+            }))
+            
             // 设置会话管理为无状态，因为使用JWT认证
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             
             // 配置请求授权规则
             .authorizeHttpRequests(authorize -> authorize
                 // 允许所有用户访问登录接口
-                .requestMatchers("/api/auth/**").permitAll()
-                
-                // 允许所有用户访问公共接口
-                .requestMatchers("/api/public/**").permitAll()
-                
-                // 允许学生角色访问学生相关接口
-                .requestMatchers("/api/student/**").hasRole("学生")
-                
-                // 允许教师角色访问教师相关接口
-                .requestMatchers("/api/teacher/**").hasRole("教师")
-                
-                // 允许管理员角色访问管理员相关接口
-                .requestMatchers("/api/admin/**").hasRole("管理员")
-                
-                // 成绩相关接口权限配置
-                .requestMatchers("/api/scores/student/**").hasRole("学生")
-                .requestMatchers("/api/scores/teacher/**").hasRole("教师")
-                .requestMatchers("/api/scores/course/**").hasRole("教师")
-                .requestMatchers("/api/scores/batch").hasRole("教师")
-                .requestMatchers("/api/scores/**").hasAnyRole("教师", "管理员")
-                
-                // 成绩异议相关接口权限配置
-                .requestMatchers("/api/score-disputes/student/**").hasRole("学生")
-                .requestMatchers("/api/score-disputes/course/**").hasRole("教师")
-                .requestMatchers("/api/score-disputes/**").hasAnyRole("教师", "管理员")
-                
-                // 用户管理相关接口权限配置
-                .requestMatchers("/api/users/profile").authenticated()
-                .requestMatchers("/api/users/{userId}/profile").authenticated()
-                .requestMatchers("/api/users/**").hasRole("管理员")
+            .requestMatchers("/auth/**").permitAll()
+            
+            // 允许所有用户访问公共接口
+            .requestMatchers("/public/**").permitAll()
+            
+            // 允许所有用户访问注册接口
+            .requestMatchers("/users").permitAll()
+            
+            // 允许学生角色访问学生相关接口
+            .requestMatchers("/student/**").hasRole("学生")
+            
+            // 允许教师角色访问教师相关接口
+            .requestMatchers("/teacher/**").hasRole("教师")
+            
+            // 允许管理员角色访问管理员相关接口
+            .requestMatchers("/admin/**").hasRole("管理员")
+            
+            // 成绩相关接口权限配置
+            .requestMatchers("/scores/student/**").hasRole("学生")
+            .requestMatchers("/scores/teacher/**").hasRole("教师")
+            .requestMatchers("/scores/course/**").hasRole("教师")
+            .requestMatchers("/scores/batch").hasRole("教师")
+            .requestMatchers("/scores/**").hasAnyRole("教师", "管理员")
+            
+            // 成绩异议相关接口权限配置
+            .requestMatchers("/score-disputes/student/**").hasRole("学生")
+            .requestMatchers("/score-disputes/course/**").hasRole("教师")
+            .requestMatchers("/score-disputes/**").hasAnyRole("教师", "管理员")
+            
+            // 用户管理相关接口权限配置
+            .requestMatchers("/users/profile").authenticated()
+            .requestMatchers("/users/{userId}/profile").authenticated()
+            .requestMatchers("/users/**").hasRole("管理员")
                 
                 // 其他所有请求都需要认证
                 .anyRequest().authenticated()
@@ -80,6 +94,8 @@ public class SecurityConfig {
         return http.build();
     }
     
+    // PasswordEncoder配置已移至com.cms.config.PasswordEncoderConfig类
+    
     /**
      * 配置AuthenticationManager
      */
@@ -87,7 +103,6 @@ public class SecurityConfig {
     public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
         return http.getSharedObject(AuthenticationManagerBuilder.class)
                 .userDetailsService(customUserDetailsService)
-                .passwordEncoder(new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder())
                 .and()
                 .build();
     }

@@ -87,4 +87,64 @@
             WHERE score_id = #{score.scoreId}
         </foreach>
     </update>
+    
+    <!-- 查询所有成绩记录 -->
+    <select id="selectAllScores" resultType="com.cms.entity.Score">
+        SELECT * FROM score
+        ORDER BY course_id, student_id
+    </select>
+    
+    <!-- 多条件查询成绩列表（分页） -->
+    <select id="selectScoresByMultipleConditions" resultType="com.cms.entity.Score">
+        SELECT s.* FROM score s
+        LEFT JOIN course c ON s.course_id = c.course_id
+        LEFT JOIN user u ON s.student_id = u.user_id
+        WHERE 1=1
+        <if test="studentId != null and studentId != ''">
+            AND s.student_id = #{studentId}
+        </if>
+        <if test="courseId != null and courseId != ''">
+            AND s.course_id = #{courseId}
+        </if>
+        <if test="keyword != null and keyword != ''">
+            AND (c.course_name LIKE CONCAT('%', #{keyword}, '%') OR u.name LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        <if test="minScore != null">
+            AND s.score &gt;= #{minScore}
+        </if>
+        <if test="maxScore != null">
+            AND s.score &lt;= #{maxScore}
+        </if>
+        <if test="status != null and status != ''">
+            AND s.status = #{status}
+        </if>
+        ORDER BY s.course_id, s.student_id
+        LIMIT #{offset}, #{limit}
+    </select>
+    
+    <!-- 多条件查询成绩总数 -->
+    <select id="countScoresByMultipleConditions" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM score s
+        LEFT JOIN course c ON s.course_id = c.course_id
+        LEFT JOIN user u ON s.student_id = u.user_id
+        WHERE 1=1
+        <if test="studentId != null and studentId != ''">
+            AND s.student_id = #{studentId}
+        </if>
+        <if test="courseId != null and courseId != ''">
+            AND s.course_id = #{courseId}
+        </if>
+        <if test="keyword != null and keyword != ''">
+            AND (c.course_name LIKE CONCAT('%', #{keyword}, '%') OR u.name LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        <if test="minScore != null">
+            AND s.score &gt;= #{minScore}
+        </if>
+        <if test="maxScore != null">
+            AND s.score &lt;= #{maxScore}
+        </if>
+        <if test="status != null and status != ''">
+            AND s.status = #{status}
+        </if>
+    </select>
 </mapper>

@@ -70,7 +70,43 @@ public interface CourseDao {
     List<Course> selectCoursesByName(@Param("courseName") String courseName);
     
     /**
-     * 多条件查询课程列表
+     * 多条件查询课程列表（分页）
+     * @param keyword 关键词（课程名、教师名）
+     * @param courseType 课程类型
+     * @param dept 院系
+     * @param teacherId 教师ID
+     * @param sortBy 排序字段
+     * @param order 排序方式（asc/desc）
+     * @param offset 偏移量
+     * @param limit 每页大小
+     * @return 课程列表
+     */
+    List<Course> selectCoursesByMultipleConditions(
+            @Param("keyword") String keyword,
+            @Param("courseType") String courseType,
+            @Param("dept") String dept,
+            @Param("teacherId") String teacherId,
+            @Param("sortBy") String sortBy,
+            @Param("order") String order,
+            @Param("offset") int offset,
+            @Param("limit") int limit);
+    
+    /**
+     * 多条件查询课程总数
+     * @param keyword 关键词（课程名、教师名）
+     * @param courseType 课程类型
+     * @param dept 院系
+     * @param teacherId 教师ID
+     * @return 课程总数
+     */
+    int countCoursesByMultipleConditions(
+            @Param("keyword") String keyword,
+            @Param("courseType") String courseType,
+            @Param("dept") String dept,
+            @Param("teacherId") String teacherId);
+    
+    /**
+     * 多条件查询课程列表（不分页）
      * @param keyword 关键词（课程名、教师名）
      * @param courseType 课程类型
      * @param dept 院系
@@ -79,7 +115,7 @@ public interface CourseDao {
      * @param order 排序方式（asc/desc）
      * @return 课程列表
      */
-    List<Course> selectCoursesByMultipleConditions(
+    List<Course> selectAllCoursesByMultipleConditions(
             @Param("keyword") String keyword,
             @Param("courseType") String courseType,
             @Param("dept") String dept,

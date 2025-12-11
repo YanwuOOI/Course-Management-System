@@ -3,6 +3,7 @@ package com.cms.service;
 import com.cms.entity.Score;
 import com.cms.dto.ScoreDTO;
 import com.cms.dto.ScoreStatDTO;
+import com.cms.dto.PageResult;
 
 import java.util.List;
 
@@ -111,4 +112,33 @@ public interface ScoreService {
      * @return 是否成功
      */
     boolean archiveScores(String semester);
+    
+    /**
+     * 导出课程成绩到Excel
+     * @param courseId 课程号
+     * @return Excel文件的字节数组
+     * @throws Exception 导出异常
+     */
+    byte[] exportCourseScores(String courseId) throws Exception;
+    
+    /**
+     * 导出所有成绩到Excel
+     * @return Excel文件的字节数组
+     * @throws Exception 导出异常
+     */
+    byte[] exportAllScores() throws Exception;
+    
+    /**
+     * 多条件查询成绩（分页）
+     * @param studentId 学号
+     * @param courseId 课程号
+     * @param keyword 关键词（课程名、学生名）
+     * @param minScore 最低分
+     * @param maxScore 最高分
+     * @param status 状态
+     * @param page 页码
+     * @param pageSize 每页大小
+     * @return 分页结果
+     */
+    PageResult<Score> searchScores(String studentId, String courseId, String keyword, Double minScore, Double maxScore, String status, int page, int pageSize);
 }

@@ -1,6 +1,8 @@
 package com.cms.controller;
 
 import com.cms.entity.CourseSelection;
+import com.cms.dto.CourseSelectionDTO;
+import com.cms.dto.PageResult;
 import com.cms.service.CourseSelectionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -120,16 +122,53 @@ public class CourseSelectionController {
     }
     
     /**
-     * 查询所有选课记录
-     * @return 选课记录列表
+     * 查询所有选课记录（分页）
+     * @param page 页码
+     * @param pageSize 每页大小
+     * @return 分页结果
      */
     @GetMapping
-    public ResponseEntity<List<CourseSelection>> getAllCourseSelections() {
+    public ResponseEntity<PageResult<CourseSelection>> getAllCourseSelections(
+            @RequestParam(required = false, defaultValue = "1") int page,
+            @RequestParam(required = false, defaultValue = "10") int pageSize) {
         try {
-            List<CourseSelection> selections = courseSelectionService.getAllCourseSelections();
+            PageResult<CourseSelection> selections = courseSelectionService.getAllCourseSelections(page, pageSize);
             return new ResponseEntity<>(selections, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    
+    /**
+     * 更新选课记录状态
+     * @param selectionId 选课记录ID
+     * @param courseSelectionDTO 选课记录DTO
+     * @return 是否成功
+     */
+    @PutMapping("/{selectionId}")
+    public ResponseEntity<Boolean> updateSelectionStatus(
+            @PathVariable Integer selectionId,
+            @RequestBody CourseSelectionDTO courseSelectionDTO) {
+        try {
+            boolean success = courseSelectionService.updateSelectionStatus(selectionId, courseSelectionDTO.getStatus());
+            return new ResponseEntity<>(success, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(false, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    
+    /**
+     * 根据选课记录ID删除选课记录
+     * @param selectionId 选课记录ID
+     * @return 是否成功
+     */
+    @DeleteMapping("/{selectionId}")
+    public ResponseEntity<Boolean> deleteCourseSelectionById(@PathVariable Integer selectionId) {
+        try {
+            boolean success = courseSelectionService.deleteCourseSelectionById(selectionId);
+            return new ResponseEntity<>(success, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(false, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

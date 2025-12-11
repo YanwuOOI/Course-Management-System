@@ -4,6 +4,7 @@ import com.cms.entity.Course;
 import com.cms.entity.CourseSelection;
 import com.cms.dao.CourseDao;
 import com.cms.dao.CourseSelectionDao;
+import com.cms.dto.PageResult;
 import com.cms.service.CourseSelectionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -108,7 +109,52 @@ public class CourseSelectionServiceImpl implements CourseSelectionService {
     }
     
     @Override
+    public PageResult<CourseSelection> getAllCourseSelections(int page, int pageSize) {
+        // 计算偏移量
+        int offset = (page - 1) * pageSize;
+        // 查询数据
+        List<CourseSelection> selections = courseSelectionDao.selectCourseSelectionsByPage(offset, pageSize);
+        // 查询总数
+        int total = courseSelectionDao.countAllCourseSelections();
+        // 创建分页结果
+        return new PageResult<>(selections, total, page, pageSize);
+    }
+    
+    @Override
     public List<CourseSelection> getAllCourseSelections() {
         return courseSelectionDao.selectAllCourseSelections();
+    }
+    
+    @Override
+    @Transactional
+    public boolean updateSelectionStatus(Integer selectionId, String status) {
+        // 检查选课记录是否存在
+        CourseSelection existingSelection = courseSelectionDao.selectCourseSelectionById(selectionId);
+        if (existingSelection == null) {
+            throw new RuntimeException("选课记录不存在");
+        }
+        
+        // 更新状态
+        existingSelection.setStatus(status);
+        int result = courseSelectionDao.updateCourseSelection(existingSelection);
+        return result > 0;
+    }
+    
+    @Override
+    @Transactional
+    public boolean deleteCourseSelectionById(Integer selectionId) {
+        // 检查选课记录是否存在
+        CourseSelection existingSelection = courseSelectionDao.selectCourseSelectionById(selectionId);
+        if (existingSelection == null) {
+            throw new RuntimeException("选课记录不存在");
+        }
+        
+        // 删除选课记录
+        int result = courseSelectionDao.deleteCourseSelectionById(selectionId);
+        
+        // 更新课程已选人数
+        courseDao.updateCourseSelectedNum(existingSelection.getCourseId(), -1);
+        
+        return result > 0;
     }
 }

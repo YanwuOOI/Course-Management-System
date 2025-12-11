@@ -3,6 +3,7 @@ package com.cms.controller;
 import com.cms.entity.Score;
 import com.cms.dto.ScoreDTO;
 import com.cms.dto.ScoreStatDTO;
+import com.cms.dto.PageResult;
 import com.cms.service.ScoreService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -229,6 +230,71 @@ public class ScoreController {
             return new ResponseEntity<>(success, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(false, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    
+    /**
+     * 导出课程成绩到Excel
+     * @param courseId 课程号
+     * @return Excel文件
+     */
+    @GetMapping("/course/{courseId}/export")
+    public ResponseEntity<byte[]> exportCourseScores(@PathVariable String courseId) {
+        try {
+            byte[] excelBytes = scoreService.exportCourseScores(courseId);
+            return ResponseEntity.ok()
+                    .header("Content-Disposition", "attachment; filename=scores_" + courseId + ".xlsx")
+                    .header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                    .body(excelBytes);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    
+    /**
+     * 导出所有成绩到Excel
+     * @return Excel文件
+     */
+    @GetMapping("/export")
+    public ResponseEntity<byte[]> exportAllScores() {
+        try {
+            byte[] excelBytes = scoreService.exportAllScores();
+            return ResponseEntity.ok()
+                    .header("Content-Disposition", "attachment; filename=all_scores.xlsx")
+                    .header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                    .body(excelBytes);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    
+    /**
+     * 多条件查询成绩（分页）
+     * @param studentId 学号
+     * @param courseId 课程号
+     * @param keyword 关键词（课程名、学生名）
+     * @param minScore 最低分
+     * @param maxScore 最高分
+     * @param status 状态
+     * @param page 页码
+     * @param pageSize 每页大小
+     * @return 分页结果
+     */
+    @GetMapping("/search")
+    public ResponseEntity<PageResult<Score>> searchScores(
+            @RequestParam(required = false) String studentId,
+            @RequestParam(required = false) String courseId,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Double minScore,
+            @RequestParam(required = false) Double maxScore,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false, defaultValue = "1") int page,
+            @RequestParam(required = false, defaultValue = "10") int pageSize) {
+        try {
+            PageResult<Score> scores = scoreService.searchScores(studentId, courseId, keyword, minScore, maxScore, status, page, pageSize);
+            return new ResponseEntity<>(scores, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

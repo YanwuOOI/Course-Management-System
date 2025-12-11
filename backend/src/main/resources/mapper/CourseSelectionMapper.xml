@@ -54,7 +54,18 @@
         WHERE c.teacher_id = #{teacherId}
     </select>
     
-    <!-- 查询所有选课记录列表 -->
+    <!-- 查询所有选课记录列表（分页） -->
+    <select id="selectCourseSelectionsByPage" resultType="com.cms.entity.CourseSelection">
+        SELECT * FROM course_selection
+        LIMIT #{offset}, #{limit}
+    </select>
+    
+    <!-- 查询所有选课记录总数 -->
+    <select id="countAllCourseSelections" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM course_selection
+    </select>
+    
+    <!-- 查询所有选课记录列表（不分页） -->
     <select id="selectAllCourseSelections" resultType="com.cms.entity.CourseSelection">
         SELECT * FROM course_selection
     </select>

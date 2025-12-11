@@ -20,7 +20,7 @@ import java.util.Map;
  * 功能：用户信息的增删改查、角色管理、状态管理等
  */
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/users")
 public class UserController {
 
     @Autowired

@@ -2,6 +2,7 @@ package com.cms.controller;
 
 import com.cms.entity.Course;
 import com.cms.dto.CourseDTO;
+import com.cms.dto.PageResult;
 import com.cms.service.CourseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -150,26 +151,30 @@ public class CourseController {
     }
     
     /**
-     * 多条件查询课程
+     * 多条件查询课程（分页）
      * @param keyword 关键词（课程名、教师名）
      * @param courseType 课程类型
      * @param dept 院系
      * @param teacherId 教师ID
      * @param sortBy 排序字段
      * @param order 排序方式（asc/desc）
-     * @return 课程列表
+     * @param page 页码
+     * @param pageSize 每页大小
+     * @return 分页结果
      */
     @GetMapping("/search")
-    public ResponseEntity<List<Course>> searchCourses(
+    public ResponseEntity<PageResult<Course>> searchCourses(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String courseType,
             @RequestParam(required = false) String dept,
             @RequestParam(required = false) String teacherId,
-            @RequestParam(required = false, defaultValue = "courseId") String sortBy,
-            @RequestParam(required = false, defaultValue = "asc") String order) {
+            @RequestParam(required = false, defaultValue = "course_id") String sortBy,
+            @RequestParam(required = false, defaultValue = "asc") String order,
+            @RequestParam(required = false, defaultValue = "1") int page,
+            @RequestParam(required = false, defaultValue = "10") int pageSize) {
         try {
-            List<Course> courses = courseService.searchCourses(keyword, courseType, dept, teacherId, sortBy, order);
-            return new ResponseEntity<>(courses, HttpStatus.OK);
+            PageResult<Course> coursePageResult = courseService.searchCourses(keyword, courseType, dept, teacherId, sortBy, order, page, pageSize);
+            return new ResponseEntity<>(coursePageResult, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }

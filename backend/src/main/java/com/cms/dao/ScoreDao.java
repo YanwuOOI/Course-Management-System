@@ -92,4 +92,50 @@ public interface ScoreDao {
      * @return 影响行数
      */
     int batchUpdateScores(@Param("scores") List<Score> scores);
+    
+    /**
+     * 查询所有成绩记录
+     * @return 成绩列表
+     */
+    List<Score> selectAllScores();
+    
+    /**
+     * 多条件查询成绩列表（分页）
+     * @param studentId 学号
+     * @param courseId 课程号
+     * @param keyword 关键词（课程名、学生名）
+     * @param minScore 最低分
+     * @param maxScore 最高分
+     * @param status 状态
+     * @param offset 偏移量
+     * @param limit 每页大小
+     * @return 成绩列表
+     */
+    List<Score> selectScoresByMultipleConditions(
+            @Param("studentId") String studentId,
+            @Param("courseId") String courseId,
+            @Param("keyword") String keyword,
+            @Param("minScore") Double minScore,
+            @Param("maxScore") Double maxScore,
+            @Param("status") String status,
+            @Param("offset") int offset,
+            @Param("limit") int limit);
+    
+    /**
+     * 多条件查询成绩总数
+     * @param studentId 学号
+     * @param courseId 课程号
+     * @param keyword 关键词（课程名、学生名）
+     * @param minScore 最低分
+     * @param maxScore 最高分
+     * @param status 状态
+     * @return 成绩总数
+     */
+    int countScoresByMultipleConditions(
+            @Param("studentId") String studentId,
+            @Param("courseId") String courseId,
+            @Param("keyword") String keyword,
+            @Param("minScore") Double minScore,
+            @Param("maxScore") Double maxScore,
+            @Param("status") String status);
 }

@@ -24,7 +24,7 @@ import java.util.Map;
  * @date 2025-11-28
  */
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/auth")
 public class AuthController {
 
     @Autowired

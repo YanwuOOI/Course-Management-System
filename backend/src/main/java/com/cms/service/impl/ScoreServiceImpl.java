@@ -4,12 +4,17 @@ import com.cms.entity.Score;
 import com.cms.dao.ScoreDao;
 import com.cms.dto.ScoreDTO;
 import com.cms.dto.ScoreStatDTO;
+import com.cms.dto.PageResult;
 import com.cms.service.ScoreService;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -240,5 +245,104 @@ public class ScoreServiceImpl implements ScoreService {
         // 这里简化实现，实际应该将成绩数据归档到历史表
         // 并更新当前成绩表的状态
         return true;
+    }
+
+    @Override
+    public byte[] exportCourseScores(String courseId) throws Exception {
+        List<Score> scores = scoreDao.selectScoresByCourseId(courseId);
+        return exportScoresToExcel(scores);
+    }
+
+    @Override
+    public byte[] exportAllScores() throws Exception {
+        List<Score> scores = scoreDao.selectAllScores();
+        return exportScoresToExcel(scores);
+    }
+
+    /**
+     * 将成绩数据导出到Excel
+     * @param scores 成绩列表
+     * @return Excel文件的字节数组
+     * @throws IOException IO异常
+     */
+    private byte[] exportScoresToExcel(List<Score> scores) throws IOException {
+        try (Workbook workbook = new XSSFWorkbook();
+             ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+
+            // 创建工作表
+            Sheet sheet = workbook.createSheet("成绩表");
+
+            // 创建标题行样式
+            CellStyle headerStyle = workbook.createCellStyle();
+            Font headerFont = workbook.createFont();
+            headerFont.setBold(true);
+            headerStyle.setFont(headerFont);
+            headerStyle.setFillForegroundColor(IndexedColors.LIGHT_BLUE.getIndex());
+            headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+            headerStyle.setBorderTop(BorderStyle.THIN);
+            headerStyle.setBorderBottom(BorderStyle.THIN);
+            headerStyle.setBorderLeft(BorderStyle.THIN);
+            headerStyle.setBorderRight(BorderStyle.THIN);
+            headerStyle.setAlignment(HorizontalAlignment.CENTER);
+            headerStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+
+            // 创建内容行样式
+            CellStyle contentStyle = workbook.createCellStyle();
+            contentStyle.setBorderTop(BorderStyle.THIN);
+            contentStyle.setBorderBottom(BorderStyle.THIN);
+            contentStyle.setBorderLeft(BorderStyle.THIN);
+            contentStyle.setBorderRight(BorderStyle.THIN);
+            contentStyle.setAlignment(HorizontalAlignment.CENTER);
+            contentStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+
+            // 创建标题行
+            Row headerRow = sheet.createRow(0);
+            String[] headers = {"成绩ID", "学号", "课程号", "成绩", "等级", "状态", "录入时间", "更新时间"};
+
+            for (int i = 0; i < headers.length; i++) {
+                Cell cell = headerRow.createCell(i);
+                cell.setCellValue(headers[i]);
+                cell.setCellStyle(headerStyle);
+                // 设置列宽
+                sheet.setColumnWidth(i, 20 * 256);
+            }
+
+            // 填充数据
+            for (int i = 0; i < scores.size(); i++) {
+                Row row = sheet.createRow(i + 1);
+                Score score = scores.get(i);
+
+                Cell[] cells = new Cell[headers.length];
+                for (int j = 0; j < cells.length; j++) {
+                    cells[j] = row.createCell(j);
+                    cells[j].setCellStyle(contentStyle);
+                }
+
+                cells[0].setCellValue(score.getScoreId());
+                cells[1].setCellValue(score.getStudentId());
+                cells[2].setCellValue(score.getCourseId());
+                cells[3].setCellValue(score.getScore());
+                cells[4].setCellValue(score.getGrade());
+                cells[5].setCellValue(score.getStatus());
+                cells[6].setCellValue(score.getInputTime().toString());
+                cells[7].setCellValue(score.getUpdateTime().toString());
+            }
+
+            // 写入输出流
+            workbook.write(outputStream);
+            return outputStream.toByteArray();
+        }
+    }
+    
+    @Override
+    public PageResult<Score> searchScores(String studentId, String courseId, String keyword, Double minScore, Double maxScore, String status, int page, int pageSize) {
+        // 计算偏移量
+        int offset = (page - 1) * pageSize;
+        // 查询数据
+        List<Score> scores = scoreDao.selectScoresByMultipleConditions(studentId, courseId, keyword, minScore, maxScore, status, offset, pageSize);
+        // 查询总数
+        int total = scoreDao.countScoresByMultipleConditions(studentId, courseId, keyword, minScore, maxScore, status);
+        // 创建分页结果
+        return new PageResult<>(scores, total, page, pageSize);
     }
 }

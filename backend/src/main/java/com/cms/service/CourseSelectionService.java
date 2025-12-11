@@ -2,6 +2,7 @@ package com.cms.service;
 
 import com.cms.entity.CourseSelection;
 import com.cms.dto.CourseSelectionDTO;
+import com.cms.dto.PageResult;
 
 import java.util.List;
 
@@ -65,8 +66,31 @@ public interface CourseSelectionService {
     List<CourseSelection> getCourseSelectionsByTeacherId(String teacherId);
     
     /**
-     * 查询所有选课记录列表
+     * 查询所有选课记录列表（分页）
+     * @param page 页码
+     * @param pageSize 每页大小
+     * @return 分页结果
+     */
+    PageResult<CourseSelection> getAllCourseSelections(int page, int pageSize);
+    
+    /**
+     * 查询所有选课记录列表（不分页）
      * @return 选课记录列表
      */
     List<CourseSelection> getAllCourseSelections();
+    
+    /**
+     * 更新选课记录状态
+     * @param selectionId 选课记录ID
+     * @param status 新状态
+     * @return 是否成功
+     */
+    boolean updateSelectionStatus(Integer selectionId, String status);
+    
+    /**
+     * 根据选课记录ID删除选课记录
+     * @param selectionId 选课记录ID
+     * @return 是否成功
+     */
+    boolean deleteCourseSelectionById(Integer selectionId);
 }

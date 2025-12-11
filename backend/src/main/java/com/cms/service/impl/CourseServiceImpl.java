@@ -3,6 +3,7 @@ package com.cms.service.impl;
 import com.cms.entity.Course;
 import com.cms.dao.CourseDao;
 import com.cms.dto.CourseDTO;
+import com.cms.dto.PageResult;
 import com.cms.service.CourseService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -107,8 +108,20 @@ public class CourseServiceImpl implements CourseService {
     }
     
     @Override
+    public PageResult<Course> searchCourses(String keyword, String courseType, String dept, String teacherId, String sortBy, String order, int page, int pageSize) {
+        // 计算偏移量
+        int offset = (page - 1) * pageSize;
+        // 查询数据
+        List<Course> courses = courseDao.selectCoursesByMultipleConditions(keyword, courseType, dept, teacherId, sortBy, order, offset, pageSize);
+        // 查询总数
+        int total = courseDao.countCoursesByMultipleConditions(keyword, courseType, dept, teacherId);
+        // 创建分页结果
+        return new PageResult<>(courses, total, page, pageSize);
+    }
+    
+    @Override
     public List<Course> searchCourses(String keyword, String courseType, String dept, String teacherId, String sortBy, String order) {
-        return courseDao.selectCoursesByMultipleConditions(keyword, courseType, dept, teacherId, sortBy, order);
+        return courseDao.selectAllCoursesByMultipleConditions(keyword, courseType, dept, teacherId, sortBy, order);
     }
     
     @Override
